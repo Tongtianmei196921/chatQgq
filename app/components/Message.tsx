@@ -8,13 +8,6 @@ interface MessageProps {
   onQuote?: (quote: string) => void
 }
 
-// 在组件顶部添加类型声明
-declare global {
-  interface Window {
-    speechSynthesis: SpeechSynthesis
-  }
-}
-
 const Message: React.FC<MessageProps> = ({ message, onQuote }) => {
   const isAI = message.role === 'assistant'
   
@@ -28,6 +21,11 @@ const Message: React.FC<MessageProps> = ({ message, onQuote }) => {
 
   // 处理文本选择
   const handleTextSelection = useCallback(() => {
+    if (!('speechSynthesis' in window)) {
+      console.warn('Speech synthesis not supported')
+      return
+    }
+
     const selection = window.getSelection()
     const selectedText = selection?.toString()
 
