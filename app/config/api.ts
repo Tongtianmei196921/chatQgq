@@ -5,7 +5,7 @@ if (!process.env.DEEPSEEK_API_KEY) {
 }
 
 export const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
+  apiKey: process.env.DEEPSEEK_API_KEY || '',
   baseURL: 'https://api.deepseek.com/v1',
   timeout: 30000,
   maxRetries: 3,

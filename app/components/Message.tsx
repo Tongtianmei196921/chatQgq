@@ -8,6 +8,13 @@ interface MessageProps {
   onQuote?: (quote: string) => void
 }
 
+// 在组件顶部添加类型声明
+declare global {
+  interface Window {
+    speechSynthesis: SpeechSynthesis
+  }
+}
+
 const Message: React.FC<MessageProps> = ({ message, onQuote }) => {
   const isAI = message.role === 'assistant'
   
@@ -136,6 +143,16 @@ const Message: React.FC<MessageProps> = ({ message, onQuote }) => {
         </div>
       )
     })
+  }
+
+  // 修改语音合成部分的代码
+  const handleSpeech = (text: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.lang = 'zh-CN'
+      utterance.rate = 1
+      window.speechSynthesis.speak(utterance)
+    }
   }
 
   return (

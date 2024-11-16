@@ -112,7 +112,6 @@ const ChatInterface = () => {
       ? `${activeQuote}\n\n${input}`.trim()
       : input.trim()
 
-    // 添加用户消息
     const userMessage: MessageType = {
       id: Date.now().toString(),
       content: fullContent,
@@ -123,6 +122,7 @@ const ChatInterface = () => {
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
+    setRetryCount(0)
 
     try {
       const response = await fetch('/api/chat', {
@@ -138,20 +138,39 @@ const ChatInterface = () => {
         })
       })
 
-      if (!response.ok) throw new Error('API request failed')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
-      const aiMessage = await response.json()
+      const data = await response.json()
       
-      setMessages(prev => [...prev, {
+      const aiMessage: MessageType = {
         id: Date.now().toString(),
-        content: aiMessage.content,
+        content: data.content,
         role: 'assistant',
         timestamp: new Date()
-      }])
+      }
+
+      setMessages(prev => [...prev, aiMessage])
+      
+      if (currentChatId) {
+        const updatedHistories = chatHistories.map(chat => {
+          if (chat.id === currentChatId) {
+            return {
+              ...chat,
+              messages: [...chat.messages, userMessage, aiMessage]
+            }
+          }
+          return chat
+        })
+        setChatHistories(updatedHistories)
+        localStorage.setItem('chatHistories', JSON.stringify(updatedHistories))
+      }
     } catch (error) {
+      console.error('Error:', error)
       if (retryCount < maxRetries) {
         setRetryCount(prev => prev + 1)
-        setTimeout(() => handleSubmit(e), 1000 * retryCount)
+        setTimeout(() => handleSubmit(e), 1000 * (retryCount + 1))
       } else {
         setMessages(prev => [...prev, {
           id: Date.now().toString(),
@@ -164,9 +183,6 @@ const ChatInterface = () => {
     } finally {
       setIsLoading(false)
     }
-
-    setActiveQuote(null) // 清除引用
-    setInput('')
   }
 
   const toggleStar = (chatId: string) => {
