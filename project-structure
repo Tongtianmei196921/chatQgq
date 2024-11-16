@@ -1,0 +1,13 @@
+ai-chat/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── chat/
+│   │   └── page.tsx
+│   └── globals.css
+├── components/
+│   ├── ChatInterface.tsx
+│   ├── Header.tsx
+│   └── WelcomeHero.tsx
+└── public/
+    └── assets/ 
